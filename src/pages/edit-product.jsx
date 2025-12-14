@@ -28,7 +28,7 @@ function EditProduct() {
   async function submitHandler(e) {
     e.preventDefault();
     const res = await axios.patch(
-      `http://localhost:8000/${params.id}`,
+      `https://admin-portal-integration-node.onrender.com/${params.id}`,
       productData
     );
     console.log(res);
