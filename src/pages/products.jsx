@@ -9,11 +9,13 @@ function Products() {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   async function fetchProducts() {
-    // const res = await fetch("http://localhost:8000/");
+    // const res = await fetch("https://admin-portal-integration-node.onrender.com/");
     // console.log("res", res);
     // const data = await res.json();
     // console.log("data", data);
-    const res = await axios.get("http://localhost:8000");
+    const res = await axios.get(
+      "https://admin-portal-integration-node.onrender.com"
+    );
     console.log(res.data);
     setProducts(res.data);
   }
@@ -21,7 +23,9 @@ function Products() {
     fetchProducts();
   }, []);
   async function deleteProduct(id) {
-    const product = await axios.delete(`http://localhost:8000/${id}`);
+    const product = await axios.delete(
+      `https://admin-portal-integration-node.onrender.com/${id}`
+    );
     const singleProduct = products.filter(
       (meriProduct) => meriProduct._id !== id
     );

@@ -21,7 +21,10 @@ function CreateProduct() {
   }
   async function submitHandler(e) {
     e.preventDefault();
-    const res = await axios.post("http://localhost:8000/", product);
+    const res = await axios.post(
+      "https://admin-portal-integration-node.onrender.com/",
+      product
+    );
     console.log(res);
     toast.success("Product created successfully");
     navigate("/");
