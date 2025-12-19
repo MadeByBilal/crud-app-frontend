@@ -1,79 +1,114 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { MdDelete, MdEdit } from "react-icons/md";
+import "../App.css";
+import "./products.css";
 
 function Products() {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+
   async function fetchProducts() {
-    // const res = await fetch("https://admin-portal-integration-node.onrender.com/");
-    // console.log("res", res);
-    // const data = await res.json();
-    // console.log("data", data);
-    const res = await axios.get(
-      "https://admin-portal-integration-node.onrender.com"
-    );
-    console.log(res.data);
-    setProducts(res.data);
+    try {
+      const res = await axios.get("http://localhost:8000/");
+      setProducts(res.data);
+    } catch (error) {
+      toast.error("Failed to load products");
+    }
   }
+
   useEffect(() => {
     fetchProducts();
   }, []);
+
   async function deleteProduct(id) {
-    const product = await axios.delete(
-      `https://admin-portal-integration-node.onrender.com/${id}`
-    );
-    const singleProduct = products.filter(
-      (meriProduct) => meriProduct._id !== id
-    );
-    setProducts(singleProduct);
-    toast.success("Product deleted successfully");
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await axios.delete(`http://localhost:8000/${id}`);
+        setProducts(products.filter((p) => p._id !== id));
+        toast.success("Product deleted");
+      } catch (error) {
+        toast.error("Failed to delete product");
+      }
+    }
   }
+
   return (
-    <div className="w-75 mx-auto my-4">
-      <div className="d-flex justify-content-between align-items-center">
-        <h1>All Products</h1>
-        <Button variant="secondary" onClick={() => navigate("/create-product")}>
-          {/* <Link to="/create-product">Create Product</Link> */}
-          Create Product
-        </Button>
-      </div>
-      <div
-        className="d-flex justify-content-center gap-4 mt-4"
-        style={{ flexWrap: "wrap" }}
-      >
-        {products.map((meriProduct) => {
-          return (
-            <Card style={{ width: "300px" }}>
-              <Card.Img variant="top" src="holder.js/100px180" />
-              <Card.Body>
-                <Card.Title>{meriProduct.title}</Card.Title>
-                <Card.Text>{meriProduct.desc}</Card.Text>
-                <Card.Text>Price: ${meriProduct.price}</Card.Text>
-                <Card.Text>Rating: {meriProduct.rating}</Card.Text>
-                <Card.Text>Review: {meriProduct.review}</Card.Text>
-                <div className="d-flex align-items-center justify-content-between">
-                  <Button variant="primary">Details</Button>
-                  <div className="actions d-flex gap-2">
-                    <MdDelete
-                      className="fs-2 border p-1"
-                      onClick={() => deleteProduct(meriProduct._id)}
-                    />
-                    <MdEdit
-                      className="fs-2 border p-1"
-                      onClick={() =>
-                        navigate(`/edit-product/${meriProduct._id}`)
-                      }
-                    />
+    <div className="app-container">
+      <div className="container">
+        <div className="page-header">
+          <h1 className="page-title">Products</h1>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/create-product")}
+          >
+            + Add Product
+          </button>
+        </div>
+
+        {products.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "4rem", color: "#999" }}>
+            <p style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>
+              No products yet
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/create-product")}
+            >
+              Create Your First Product
+            </button>
+          </div>
+        ) : (
+          <div className="products-grid">
+            {products.map((product) => (
+              <div key={product._id} className="product-card">
+                <div className="product-image">
+                  <img
+                    src={
+                      product.productImage
+                        ? `http://localhost:8000${product.productImage}`
+                        : "https://via.placeholder.com/400x300?text=No+Image"
+                    }
+                    alt={product.title}
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=No+Image";
+                    }}
+                  />
+                </div>
+                <div className="product-content">
+                  <h3 className="product-title">{product.title}</h3>
+                  <p className="product-desc">{product.desc}</p>
+                  <div className="product-info">
+                    <span className="product-price">${product.price}</span>
+                    <span className="product-rating">⭐ {product.rating}</span>
+                  </div>
+                  {product.review && (
+                    <p className="product-review">"{product.review}"</p>
+                  )}
+                  <div className="product-actions">
+                    <button
+                      className="btn-icon edit"
+                      onClick={() => navigate(`/edit-product/${product._id}`)}
+                      title="Edit"
+                    >
+                      <MdEdit size={20} />
+                    </button>
+                    <button
+                      className="btn-icon delete"
+                      onClick={() => deleteProduct(product._id)}
+                      title="Delete"
+                    >
+                      <MdDelete size={20} />
+                    </button>
                   </div>
                 </div>
-              </Card.Body>
-            </Card>
-          );
-        })}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
